@@ -1,0 +1,79 @@
+-- 1. Create Database
+CREATE DATABASE SkyTrack_Airline_DB;
+GO
+USE SkyTrack_Airline_DB;
+GO
+
+-- 2. Tables Creation
+
+CREATE TABLE AIRPORT (
+    IATA_Code NVARCHAR(3) PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    City VARCHAR(100) NOT NULL,
+    Country VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE AIRCRAFT (
+    Aircraft_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Registration_Number VARCHAR(20) UNIQUE NOT NULL,
+    Model VARCHAR(50) NOT NULL,
+    Manufacturer VARCHAR(50) NOT NULL,
+    Total_Seating_Capacity INT NOT NULL CHECK (Total_Seating_Capacity > 0),
+    Year_Manufacture INT
+);
+CREATE TABLE PASSENGER (
+    Passenger_ID INT IDENTITY(1,1) PRIMARY KEY,
+    National_ID VARCHAR(20) UNIQUE NOT NULL,
+    Full_Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Nationality VARCHAR(50) NOT NULL,
+    Date_of_Birth DATE NOT NULL
+);
+
+CREATE TABLE CREW_MEMBER (
+    Crew_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Full_Name VARCHAR(100) NOT NULL,
+    Role VARCHAR(20) NOT NULL CHECK (Role IN ('Pilot', 'Co-Pilot', 'Flight Attendant', 'Engineer')),
+    License_Number VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE FLIGHT (
+    Flight_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Flight_Number VARCHAR(20) UNIQUE NOT NULL,
+    Departure_Datetime DATETIME NOT NULL,
+    Arrival_Datetime DATETIME NOT NULL,
+    Status VARCHAR(20) NOT NULL DEFAULT 'Scheduled' CHECK (Status IN ('Scheduled', 'Delayed', 'Cancelled', 'Completed')),
+    Aircraft_ID INT NOT NULL,
+    Origin_IATA VARCHAR(3) NOT NULL,
+    Destination_IATA VARCHAR(3) NOT NULL,
+    
+    CONSTRAINT CHK_FlightTimes CHECK (Arrival_Datetime > Departure_Datetime),
+    CONSTRAINT FK_Flight_Aircraft FOREIGN KEY (Aircraft_ID) REFERENCES AIRCRAFT(Aircraft_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_Flight_Origin FOREIGN KEY (Origin_IATA) REFERENCES AIRPORT(IATA_Code) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_Flight_Dest FOREIGN KEY (Destination_IATA) REFERENCES AIRPORT(IATA_Code)
+);
+
+
+
+CREATE TABLE BOOKING (
+    Booking_ID INT IDENTITY(1,1) PRIMARY KEY,
+    Passenger_ID INT NOT NULL,
+    Flight_ID INT NOT NULL,
+    Seat_Number VARCHAR(10) NOT NULL,
+    Class VARCHAR(20) NOT NULL CHECK (Class IN ('Economy', 'Business', 'First')),
+    Price DECIMAL(10,2) NOT NULL CHECK (Price > 0),
+    Booking_Date DATE NOT NULL DEFAULT GETDATE(),
+    
+    CONSTRAINT FK_Booking_Passenger FOREIGN KEY (Passenger_ID) REFERENCES PASSENGER(Passenger_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_Booking_Flight FOREIGN KEY (Flight_ID) REFERENCES FLIGHT(Flight_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE FLIGHT_CREW (
+    Flight_ID INT NOT NULL,
+    Crew_ID INT NOT NULL,
+    PRIMARY KEY (Flight_ID, Crew_ID),
+    CONSTRAINT FK_FC_Flight FOREIGN KEY (Flight_ID) REFERENCES FLIGHT(Flight_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT FK_FC_Crew FOREIGN KEY (Crew_ID) REFERENCES CREW_MEMBER(Crew_ID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+GO
