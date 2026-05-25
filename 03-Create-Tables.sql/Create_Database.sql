@@ -1,13 +1,20 @@
 -- 1. Create Database
+USE master;
+GO
+
+DROP DATABASE IF EXISTS SkyTrack_Airline_DB;
+GO
+
 CREATE DATABASE SkyTrack_Airline_DB;
 GO
+
 USE SkyTrack_Airline_DB;
 GO
 
 -- 2. Tables Creation
 
 CREATE TABLE AIRPORT (
-    IATA_Code NVARCHAR(3) PRIMARY KEY,
+    IATA_Code VARCHAR(3) PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     City VARCHAR(100) NOT NULL,
     Country VARCHAR(100) NOT NULL
@@ -20,15 +27,6 @@ CREATE TABLE AIRCRAFT (
     Manufacturer VARCHAR(50) NOT NULL,
     Total_Seating_Capacity INT NOT NULL CHECK (Total_Seating_Capacity > 0),
     Year_Manufacture INT
-);
-CREATE TABLE PASSENGER (
-    Passenger_ID INT IDENTITY(1,1) PRIMARY KEY,
-    National_ID VARCHAR(20) UNIQUE NOT NULL,
-    Full_Name VARCHAR(100) NOT NULL,
-    Email VARCHAR(100) UNIQUE NOT NULL,
-    Phone VARCHAR(20),
-    Nationality VARCHAR(50) NOT NULL,
-    Date_of_Birth DATE NOT NULL
 );
 
 CREATE TABLE CREW_MEMBER (
@@ -54,7 +52,15 @@ CREATE TABLE FLIGHT (
     CONSTRAINT FK_Flight_Dest FOREIGN KEY (Destination_IATA) REFERENCES AIRPORT(IATA_Code)
 );
 
-
+CREATE TABLE PASSENGER (
+    Passenger_ID INT IDENTITY(1,1) PRIMARY KEY,
+    National_ID VARCHAR(20) UNIQUE NOT NULL,
+    Full_Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Phone VARCHAR(20),
+    Nationality VARCHAR(50) NOT NULL,
+    Date_of_Birth DATE NOT NULL
+);
 
 CREATE TABLE BOOKING (
     Booking_ID INT IDENTITY(1,1) PRIMARY KEY,
